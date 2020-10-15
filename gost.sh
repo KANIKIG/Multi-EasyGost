@@ -400,7 +400,7 @@ function ssconf()
 }
 function s5conf()
 {
-
+	exit
 }
 function proxy()
 {
