@@ -6,6 +6,8 @@ Wants=network-online.target systemd-networkd-wait-online.service
 [Service]
 Type=simple
 User=root
+Restart=always
+RestartSec=5
 DynamicUser=true
 ExecStart=/usr/bin/gost -C /etc/gost/config.json
 
