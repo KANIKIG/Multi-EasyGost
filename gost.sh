@@ -161,21 +161,16 @@ function read_protocol()
     echo -e "-----------------------------------"
     read -p "请选择转发方式: " numprotocol
 
-    case $numprotocol in 
-	1)
+    if [ "$numprotocol" == "1" ]; then
         flag_a="nonencrypt"
-		;;
-	2)
+    elif [ "$numprotocol" == "2" ]; then
         encrypt
-		;;
-	3)
+    elif [ "$numprotocol" == "3" ]; then
         decrypt
-		;;
-	*)
+    else
         echo "type error, please try again"
         exit
-		;;
-	esac
+    fi
 }
 function read_s_port()
 {
@@ -260,21 +255,16 @@ function encrypt()
     echo -e "-----------------------------------"
     read -p "请选择转发传输类型: " numencrypt
 
-    case $numencrypt in 
-	1)
+    if [ "$numencrypt" == "1" ]; then
         flag_a="encrypttls"
-		;;
-	2)
+    elif [ "$numencrypt" == "2" ]; then
         flag_a="encryptws"
-		;;
-	3)
+    elif [ "$numencrypt" == "3" ]; then
         flag_a="encryptwss"
-		;;
-	*)
+    else
         echo "type error, please try again"
         exit
-		;;
-	esac
+    fi
 }
 function decrypt()
 {
@@ -287,111 +277,99 @@ function decrypt()
     echo -e "-----------------------------------"
     read -p "请选择解密传输类型: " numdecrypt
 
-    case $numdecrypt in
-	1)
+    if [ "$numdecrypt" == "1" ]; then
         flag_a="decrypttls"
-		;;
-	2)
+    elif [ "$numdecrypt" == "2" ]; then
         flag_a="decryptws"
-		;;
-	3)
+    elif [ "$numdecrypt" == "3" ]; then
         flag_a="decryptwss"
-		;;
-	*)
+    else
         echo "type error, please try again"
         exit
-		;;
-	esac
+    fi
 }
 function method()
 {
     if [ $i -eq 1 ]; then
-        case $is_encrypt in 
-		"nonencrypt")
+        if [ "$is_encrypt" == "nonencrypt" ]; then
             echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-		;;
-	"encrypttls")
+        elif [ "$is_encrypt" == "encrypttls" ]; then
             echo "        \"tcp://:$s_port\",
         \"udp://:$s_port\"
     ],
     \"ChainNodes\": [
         \"relay+tls://$d_ip:$d_port\"" >> $gost_conf_path
-		;;
-	"encryptws")
+    	elif [ "$is_encrypt" == "encryptws" ]; then
         	echo "        \"tcp://:$s_port\",
     	\"udp://:$s_port\"
 	],
 	\"ChainNodes\": [
     	\"relay+ws://$d_ip:$d_port\"" >> $gost_conf_path
-		;;
-	"encryptwss")
+		elif [ "$is_encrypt" == "encryptwss" ]; then
     		echo "        \"tcp://:$s_port\",
 		\"udp://:$s_port\"
 	],
 	\"ChainNodes\": [
 		\"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
-		;;
-	"decrypttls")
+        elif [ "$is_encrypt" == "decrypttls" ]; then
+            {
 			echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-	"decryptws")
+		}
+        elif [ "$is_encrypt" == "decryptws" ]; then
+			{
             echo "        \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-    "decryptwss")
+		}
+        elif [ "$is_encrypt" == "decryptwss" ]; then
+			{
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-		*)
+		}
+        else
             echo "config error"
-			exit
-			;;
-		esac
+        fi
 	else
-        case $is_encrypt in 
-		"nonencrypt")
+        if [ "$is_encrypt" == "nonencrypt" ]; then
             echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-				;;
-        "encrypttls")
+        elif [ "$is_encrypt" == "encrypttls" ]; then
             echo "                \"tcp://:$s_port\",
                 \"udp://:$s_port\"
             ],
             \"ChainNodes\": [
                 \"relay+tls://$d_ip:$d_port\"" >> $gost_conf_path
-				;;
-	    "encryptws")
+	    elif [ "$is_encrypt" == "encryptws" ]; then
 	        echo "                \"tcp://:$s_port\",
 	            \"udp://:$s_port\"
 	        ],
 	        \"ChainNodes\": [
 	            \"relay+ws://$d_ip:$d_port\"" >> $gost_conf_path
-				;;
-		"encryptwss")
+		elif [ "$is_encrypt" == "encryptwss" ]; then
 		    echo "                \"tcp://:$s_port\",
 		        \"udp://:$s_port\"
 		    ],
 		    \"ChainNodes\": [
 		        \"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
-				;;
-        "decrypttls" )
+        elif [ "$is_encrypt" == "decrypttls" ]; then
+			{
             echo "                \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-		"decryptws")
+		}
+        elif [ "$is_encrypt" == "decryptws" ]; then
+			{
             echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-		"decryptwss")
+		}
+        elif [ "$is_encrypt" == "decryptwss" ]; then
+			{
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
-			;;
-		*)
+		}
+        else
             echo "config error"
-			;;
-		esac
+        fi
     fi
 }
 function ssconf()
@@ -409,27 +387,27 @@ function ssconf()
     echo -e "-----------------------------------"
     read -p "请选择ss加密方式: " ssencrypt
 	
-    if [ "$ssencrypt" = "1" ]; then
+    if [ "$ssencrypt" == "1" ]; then
 		echo ",
 	             \"ss://aes-256-gcm:$sspasswd@:$d_port\"" >> $gost_conf_path
 		echo -e "已选择 aes-256-gcm"
-    elif [ "$ssencrypt" = "2" ]; then
+    elif [ "$ssencrypt" == "2" ]; then
 		echo ",
 	             \"ss://aes-256-cfb:$sspasswd@:$d_port\"" >> $gost_conf_path
 		echo -e "已选择 aes-256-cfb"
-	elif [ "$ssencrypt" = "3" ]; then
+	elif [ "$ssencrypt" == "3" ]; then
 		echo ",
 		 	     \"ss://chacha20-ietf-poly1305:$sspasswd@:$d_port\"" >> $gost_conf_path
 		echo -e "已选择 chacha20-ietf-poly1305"
-	elif [ "$ssencrypt" = "4" ]; then
+	elif [ "$ssencrypt" == "4" ]; then
 		 echo ",
 		 		 \"ss://chacha20:$sspasswd@:$d_port\"" >> $gost_conf_path
 		 echo -e "已选择 chacha20"
-	elif [ "$ssencrypt" = "5" ]; then
+	elif [ "$ssencrypt" == "5" ]; then
 		 echo ",
 		 		 \"ss://rc4-md5:$sspasswd@:$d_port\"" >> $gost_conf_path			 
 		 echo -e "已选择 rc4-md5"
- 	elif [ "$ssencrypt" = "4" ]; then
+ 	elif [ "$ssencrypt" == "4" ]; then
  		 echo ",
  		 		 \"ss://AEAD_CHACHA20_POLY1305:$sspasswd@:$d_port\"" >> $gost_conf_path
  		 echo -e "已选择 AEAD_CHACHA20_POLY1305"
@@ -510,19 +488,19 @@ function show_all_conf()
         trans_conf=$(sed -n "${i}p" $raw_conf_path)
         eachconf_retrieve
 
-        if [ "$is_encrypt" = "nonencrypt" ]; then
+        if [ "$is_encrypt" == "nonencrypt" ]; then
             str="tcp+udp不加密"
-        elif [ "$is_encrypt" = "encrypttls" ]; then
+        elif [ "$is_encrypt" == "encrypttls" ]; then
             str="tls隧道"
-        elif [ "$is_encrypt" = "encryptws" ]; then
+        elif [ "$is_encrypt" == "encryptws" ]; then
             str="ws隧道"
-        elif [ "$is_encrypt" = "encryptwss" ]; then
+        elif [ "$is_encrypt" == "encryptwss" ]; then
             str="wss隧道"
-        elif [ "$is_encrypt" = "decrypttls" ]; then
+        elif [ "$is_encrypt" == "decrypttls" ]; then
             str="tls解密"
-        elif [ "$is_encrypt" = "decryptws" ]; then
+        elif [ "$is_encrypt" == "decryptws" ]; then
             str="ws解密"
-        elif [ "$is_encrypt" = "decryptwss" ]; then
+        elif [ "$is_encrypt" == "decryptwss" ]; then
             str="wss解密"
         fi
 
