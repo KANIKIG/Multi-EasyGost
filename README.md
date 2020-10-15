@@ -6,7 +6,6 @@
 ***
 ## 简介
 
-> 由 KANIKIG 制作，参考了 @风萧萧兮易水寒 大佬的一键脚本，主要实现了systemd及gost配置文件对gost进行管理，能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效。支持tcp+udp不加密转发, relay+tls/ws/wss加密转发, relay+tls/ws/wss解密对接转发。 
 > 项目地址及帮助文档:  
 > https://github.com/KANIKIG/Multi-EasyGost
 ***
