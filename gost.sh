@@ -330,7 +330,7 @@ function method()
         else
             echo "config error"
         fi
-    elif [ $i -gt 1 ]; then
+	else
         if [ "$is_encrypt" = "nonencrypt" ]; then
             echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
