@@ -313,24 +313,15 @@ function method()
 	\"ChainNodes\": [
 		\"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "decrypttls" ]; then
-            {
 			echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         elif [ "$is_encrypt" == "decryptws" ]; then
-			{
             echo "        \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         elif [ "$is_encrypt" == "decryptwss" ]; then
-			{
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         else
             echo "config error"
         fi
-	else
+	elif [ $i -gt 1 ]; then
         if [ "$is_encrypt" == "nonencrypt" ]; then
             echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
@@ -353,23 +344,17 @@ function method()
 		    \"ChainNodes\": [
 		        \"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "decrypttls" ]; then
-			{
             echo "                \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         elif [ "$is_encrypt" == "decryptws" ]; then
-			{
             echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         elif [ "$is_encrypt" == "decryptwss" ]; then
-			{
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
-			proxy
-		}
         else
             echo "config error"
         fi
+	else
+		echo "config error"
+		exit
     fi
 }
 function ssconf()
@@ -423,7 +408,7 @@ function s5conf()
 function proxy()
 {
     echo -e "------------------------------------------------------------------"
-    read -p "是否需要为上述端口一键安装ss或sock5代理?(y/n 默认:N)" is_proxy
+    read -p "是否需要一键安装ss或sock5代理?(y/n 默认:N)" is_proxy
 	case $is_proxy in
 	        [yY][eE][sS] | [yY])
 				echo -e "------------------------------------------------------------------"
@@ -433,9 +418,9 @@ function proxy()
 			    echo -e "[2] socks5(未完成)"
 			    echo -e "-----------------------------------"
 			    read -p "请选择代理类型: " numproxy
-			    if [ "$numproxy" = "1" ]; then
+			    if [ "$numproxy" == "1" ]; then
 			        ssconf
-			    elif [ "$numproxy" = "2" ]; then
+			    elif [ "$numproxy" == "2" ]; then
 			        s5conf
 			    else
 			        echo "type error, please try again"
