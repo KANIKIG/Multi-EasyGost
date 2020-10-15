@@ -1,0 +1,13 @@
+[Unit]
+Description=gost
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Type=simple
+User=root
+DynamicUser=true
+ExecStart=/usr/bin/gost -C /etc/gost/config.json
+
+[Install]
+WantedBy=multi-user.target
