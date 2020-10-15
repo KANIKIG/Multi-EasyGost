@@ -313,14 +313,20 @@ function method()
 	\"ChainNodes\": [
 		\"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" = "decrypttls" ]; then
-            echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+            {
+			echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         elif [ "$is_encrypt" = "decryptws" ]; then
+			{
             echo "        \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         elif [ "$is_encrypt" = "decryptwss" ]; then
+			{
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         else
             echo "config error"
         fi
@@ -347,14 +353,20 @@ function method()
 		    \"ChainNodes\": [
 		        \"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" = "decrypttls" ]; then
+			{
             echo "                \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         elif [ "$is_encrypt" = "decryptws" ]; then
+			{
             echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         elif [ "$is_encrypt" = "decryptwss" ]; then
+			{
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
 			proxy
+		}
         else
             echo "config error"
         fi
