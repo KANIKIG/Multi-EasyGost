@@ -354,6 +354,81 @@ function method()
         fi
     fi
 }
+function ssconf()
+{	echo -e "-----------------------------------"
+	read -p "请输入ss密码: " sspasswd
+	echo -e "------------------------------------------------------------------"
+    echo -e "请问您要设置的ss加密(仅提供常用的几种): "
+    echo -e "-----------------------------------"
+    echo -e "[1] aes-256-gcm"
+    echo -e "[2] aes-256-cfb"
+	echo -e "[3] chacha20-ietf-poly1305"
+	echo -e "[4] chacha20"
+	echo -e "[5] rc4-md5"
+	echo -e "[6] AEAD_CHACHA20_POLY1305"
+    echo -e "-----------------------------------"
+    read -p "请选择ss加密方式: " ssencrypt
+	
+    if [ "$ssencrypt" = "1" ]; then
+		echo ",
+	             \"ss://aes-256-gcm:$sspasswd@:$d_port\"" >> $gost_conf_path
+		echo -e "已选择 aes-256-gcm"
+    elif [ "$ssencrypt" = "2" ]; then
+		echo ",
+	             \"ss://aes-256-cfb:$sspasswd@:$d_port\"" >> $gost_conf_path
+		echo -e "已选择 aes-256-cfb"
+	elif [ "$ssencrypt" = "3" ]; then
+		echo ",
+		 	     \"ss://chacha20-ietf-poly1305:$sspasswd@:$d_port\"" >> $gost_conf_path
+		echo -e "已选择 chacha20-ietf-poly1305"
+	elif [ "$ssencrypt" = "4" ]; then
+		 echo ",
+		 		 \"ss://chacha20:$sspasswd@:$d_port\"" >> $gost_conf_path
+		 echo -e "已选择 chacha20"
+	elif [ "$ssencrypt" = "5" ]; then
+		 echo ",
+		 		 \"ss://rc4-md5:$sspasswd@:$d_port\"" >> $gost_conf_path			 
+		 echo -e "已选择 rc4-md5"
+ 	elif [ "$ssencrypt" = "4" ]; then
+ 		 echo ",
+ 		 		 \"ss://AEAD_CHACHA20_POLY1305:$sspasswd@:$d_port\"" >> $gost_conf_path
+ 		 echo -e "已选择 AEAD_CHACHA20_POLY1305"
+	else
+        echo "type error, please try again"
+        exit
+    fi
+}
+function s5conf()
+{
+
+}
+function proxy()
+{
+    echo -e "------------------------------------------------------------------"
+    read -p "是否需要为上述端口一键安装ss或sock5代理?(y/n 默认:N)" is_proxy
+	case $is_proxy in
+	        [yY][eE][sS] | [yY])
+				echo -e "------------------------------------------------------------------"
+			    echo -e "请问您要设置的代理类型: "
+			    echo -e "-----------------------------------"
+			    echo -e "[1] ss"
+			    echo -e "[2] socks5(未完成)"
+			    echo -e "-----------------------------------"
+			    read -p "请选择代理类型: " numproxy
+			    if [ "$numproxy" = "1" ]; then
+			        ssconf
+			    elif [ "$numproxy" = "2" ]; then
+			        s5conf
+			    else
+			        echo "type error, please try again"
+			        exit
+			    fi
+	            ;;
+	        *)
+	            sleep 2
+	            ;;
+	        esac
+}
 function writeconf()
 {
     count_line=$(awk 'END{print NR}' $raw_conf_path)
@@ -371,12 +446,14 @@ function writeconf()
                 eachconf_retrieve
                 multiconfstart
                 method
+				proxy
                 multiconflast
             else
                 trans_conf=$(sed -n "${i}p" $raw_conf_path)
                 eachconf_retrieve
                 multiconfstart
                 method
+				proxy
                 multiconflast
             fi
         fi
@@ -421,7 +498,7 @@ echo && echo -e "                      gost 一键安装配置脚本
         (2)能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效
 		(3)机器reboot后转发不失效
   功能: (1)tcp+udp不加密转发, (2)中转机加密转发, (3)落地机解密对接转发
-  帮助文档：
+  帮助文档：https://github.com/KANIKIG/Multi-EasyGost
   
  ${Green_font_prefix}1.${Font_color_suffix} 安装 gost
  ${Green_font_prefix}2.${Font_color_suffix} 更新 gost
