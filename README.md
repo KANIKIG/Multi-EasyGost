@@ -6,10 +6,10 @@
 ***
 > 脚本简介
 > > 适合懒人的超简单gost一键转发脚本:  
-> > `wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`  
-> > 脚本由 @stsdustjc 制作，参考了 @风萧萧兮易水寒 大佬的一键脚本，主要实现了systemd及gost配置文件对gost进行管理，能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效。但功能性较弱，目前仅支持tcp+udp不加密转发, relay+tls加密转发, relay+tls解密对接转发。也算是能勉强保护一下裸奔的流量和搭建简单隧道的需求了。  
+> > `wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`  
+> > 脚本由 KANIKIG 制作，参考了 @风萧萧兮易水寒 大佬的一键脚本，主要实现了systemd及gost配置文件对gost进行管理，能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效。支持tcp+udp不加密转发, relay+tls/ws/wss加密转发, relay+tls/ws/wss解密对接转发。 
 > > 项目地址及帮助文档:  
-> > https://github.com/KANIKIG/EasyGost  
+> > https://github.com/KANIKIG/Multi-EasyGost
 ***
 ## 本一键脚本适用人群  
 * 你只是想赶快用上gost进行流量转发，不想学习gost的详细配置方法，只想越简单越好  
@@ -18,10 +18,10 @@
 ##### 如果你不符合上述条件请自行阅读gost的官方文档，gost能够通过简单的命令实现非常多强大的功能，但本脚本并未加入那些功能  
 ##### 如果你是萌新，有很多与IP/端口/转发有关的概念都还没弄清楚，请跟随本文的「完整食用教程」一步步进行设置，最终通过一键脚本实现转发  
 
-***  
+***
 ## 完整食用教程  
 * 启动脚本: 在已经运行过如下一键脚本的情况下  
-`wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`  
+`wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`  
 * 再次运行本脚本只需要输入`./gost.sh`回车即可  
 
 ***
@@ -108,3 +108,4 @@
     3. 在[C]主机上选择协议[3]的，需要比较注意，在[C]主机上选择协议[3]意味着你[B]主机选的是协议[2]，那么[C]主机在用此脚本时第一次填写的本地端口(难点2)，应该与[B]主机上配置时填写的目标端口相一致(难点4.2)，一般是`443`，而第二次填写的端口应与[C]主机上具体服务所监听的端口相一致，按如上示例即为`22332`  
 
 ### 到此一切设置完毕，尽情享受GOST为你带来的便捷吧 :)  
+
