@@ -314,10 +314,13 @@ function method()
 		\"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" = "decrypttls" ]; then
             echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         elif [ "$is_encrypt" = "decryptws" ]; then
             echo "        \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         elif [ "$is_encrypt" = "decryptwss" ]; then
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         else
             echo "config error"
         fi
@@ -345,10 +348,13 @@ function method()
 		        \"relay+wss://$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" = "decrypttls" ]; then
             echo "                \"relay+tls://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         elif [ "$is_encrypt" = "decryptws" ]; then
             echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         elif [ "$is_encrypt" = "decryptwss" ]; then
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+			proxy
         else
             echo "config error"
         fi
@@ -446,14 +452,12 @@ function writeconf()
                 eachconf_retrieve
                 multiconfstart
                 method
-				proxy
                 multiconflast
             else
                 trans_conf=$(sed -n "${i}p" $raw_conf_path)
                 eachconf_retrieve
                 multiconfstart
                 method
-				proxy
                 multiconflast
             fi
         fi
