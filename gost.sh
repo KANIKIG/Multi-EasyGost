@@ -205,17 +205,17 @@ function read_d_ip()
     	read -p "请选择ss加密方式: " ssencrypt
 	
     	if [ "$ssencrypt" == "1" ]; then
-			flag_c = "aes-256-gcm"
+			flag_c="aes-256-gcm"
     	elif [ "$ssencrypt" == "2" ]; then
-			flag_c = "aes-256-cfb"
+			flag_c="aes-256-cfb"
 		elif [ "$ssencrypt" == "3" ]; then
-			flag_c = "chacha20-ietf-poly1305"
+			flag_c="chacha20-ietf-poly1305"
 		elif [ "$ssencrypt" == "4" ]; then
-		 	flag_c = "chacha20"
+		 	flag_c="chacha20"
 		elif [ "$ssencrypt" == "5" ]; then
-		 	flag_c = "rc4-md5"			 
+		 	flag_c="rc4-md5"			 
  		elif [ "$ssencrypt" == "6" ]; then
- 		 	flag_c = "AEAD_CHACHA20_POLY1305"
+ 		 	flag_c="AEAD_CHACHA20_POLY1305"
 		else
         	echo "type error, please try again"
         	exit
