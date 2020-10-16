@@ -33,9 +33,7 @@
   - relay+ws
   - relay+wss
 
-### 将要增加的功能
-
-- 落地机一键创建ss或socks5代理
+- 落地机一键创建ss或socks5代理 (gost内置)
 
 ## 食用教程  
 
