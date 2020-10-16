@@ -347,10 +347,8 @@ function proxy()
 	read -p "请选择代理类型: " numproxy
 		if [ "$numproxy" == "1" ]; then
 			flag_a="ss"
-			ssconf
 		elif [ "$numproxy" == "2" ]; then
 			flag_a="socks"
-			s5conf
 		else
 			echo "type error, please try again"
 			exit
