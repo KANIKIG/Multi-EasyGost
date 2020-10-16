@@ -182,6 +182,9 @@ function read_s_port()
 	if [ "$flag_a" == "ss" ];then
 		echo -e "-----------------------------------"
 		read -p "请输入ss密码: " flag_b
+	elif [ "$flag_a" == "socks" ];then
+		echo -e "-----------------------------------"
+		read -p "请输入socks密码: " flag_b
 	else
     	echo -e "------------------------------------------------------------------"
     	echo -e "------------------------------------------------------------------"
@@ -220,6 +223,9 @@ function read_d_ip()
         	echo "type error, please try again"
         	exit
     	fi
+	elif [ "$flag_a" == "socks" ]; then
+		echo -e "-----------------------------------"
+		read -p "请输入socks用户名: " flag_c
 	else
     	echo -e "------------------------------------------------------------------"
     	echo -e "------------------------------------------------------------------"
@@ -235,6 +241,11 @@ function read_d_port()
     	echo -e "------------------------------------------------------------------"
     	echo -e "------------------------------------------------------------------"
     	echo -e "请问你要设置ss代理服务的端口?"
+    	read -p "请输入: " flag_d
+	elif [ "$flag_a" == "socks" ]; then
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "请问你要设置socks代理服务的端口?"
     	read -p "请输入: " flag_d
 	else
     	echo -e "------------------------------------------------------------------"
@@ -341,8 +352,8 @@ function proxy()
 	echo -e "------------------------------------------------------------------"
 	echo -e "请问您要设置的代理类型: "
 	echo -e "-----------------------------------"
-	echo -e "[1] ss"
-	echo -e "[2] socks5(未完成)"
+	echo -e "[1] shadowsocks"
+	echo -e "[2] socks5(强烈建议加隧道用于Telegram代理)"
 	echo -e "-----------------------------------"
 	read -p "请选择代理类型: " numproxy
 		if [ "$numproxy" == "1" ]; then
@@ -386,6 +397,8 @@ function method()
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "ss" ]; then
             echo "        \"ss://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
+        elif [ "$is_encrypt" == "socks" ]; then
+            echo "        \"socks5://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
         else
             echo "config error"
         fi
@@ -419,6 +432,8 @@ function method()
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "ss" ]; then
             echo "        \"ss://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
+        elif [ "$is_encrypt" == "socks" ]; then
+            echo "        \"socks5://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
         else
             echo "config error"
         fi
@@ -485,6 +500,8 @@ function show_all_conf()
             str="wss解密"
         elif [ "$is_encrypt" == "ss" ]; then
             str="ss"
+		elif [ "$is_encrypt" == "socks" ]; then
+			str="socks5"
         fi
 
         echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
