@@ -147,7 +147,7 @@ function Restart_ct()
 }
 function read_protocol()
 {
-    echo -e "请问您要设置哪种转发: "
+    echo -e "请问您要设置哪种功能: "
     echo -e "-----------------------------------"
     echo -e "[1] tcp+udp流量转发, 不加密"
     echo -e "说明: 一般设置在国内中转机上"
@@ -159,7 +159,10 @@ function read_protocol()
     echo -e "[3] 解密由gost传输而来的流量并转发"
     echo -e "说明: 对于经由gost加密中转的流量, 通过此选项进行解密并转发给本机的代理服务端口或转发给其他远程机器, 一般设置在用于接收中转流量的国外机器上"
     echo -e "-----------------------------------"
-    read -p "请选择转发方式: " numprotocol
+    echo -e "[4] 一键安装ss/socks5代理"
+    echo -e "说明: 使用gost内置的代理协议，轻量且易于管理"
+    echo -e "-----------------------------------"
+    read -p "请选择: " numprotocol
 
     if [ "$numprotocol" == "1" ]; then
         flag_a="nonencrypt"
@@ -167,33 +170,78 @@ function read_protocol()
         encrypt
     elif [ "$numprotocol" == "3" ]; then
         decrypt
+    elif [ "$numprotocol" == "4" ]; then
+        proxy
     else
         echo "type error, please try again"
         exit
     fi
 }
 function read_s_port()
-{
-    echo -e "------------------------------------------------------------------"
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机哪个端口接收到的流量进行转发?"
-    read -p "请输入: " flag_b
+{	
+	if [ flag_a == "ss" ];then
+		echo -e "-----------------------------------"
+		read -p "请输入ss密码: " flag_b
+	else
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "请问你要将本机哪个端口接收到的流量进行转发?"
+    	read -p "请输入: " flag_b
+	fi
 }
 function read_d_ip()
-{
-    echo -e "------------------------------------------------------------------"
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
-    echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
-    echo -e "    具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/KANIKIG/Multi-EasyGost)"
-    read -p "请输入: " flag_c
+{	
+	if [ flag_a == "ss" ]; then
+		echo -e "------------------------------------------------------------------"
+    	echo -e "请问您要设置的ss加密(仅提供常用的几种): "
+    	echo -e "-----------------------------------"
+    	echo -e "[1] aes-256-gcm"
+    	echo -e "[2] aes-256-cfb"
+		echo -e "[3] chacha20-ietf-poly1305"
+		echo -e "[4] chacha20"
+		echo -e "[5] rc4-md5"
+		echo -e "[6] AEAD_CHACHA20_POLY1305"
+    	echo -e "-----------------------------------"
+    	read -p "请选择ss加密方式: " ssencrypt
+	
+    	if [ "$ssencrypt" == "1" ]; then
+			flag_c = "aes-256-gcm"
+    	elif [ "$ssencrypt" == "2" ]; then
+			flag_c = "aes-256-cfb"
+		elif [ "$ssencrypt" == "3" ]; then
+			flag_c = "chacha20-ietf-poly1305"
+		elif [ "$ssencrypt" == "4" ]; then
+		 	flag_c = "chacha20"
+		elif [ "$ssencrypt" == "5" ]; then
+		 	flag_c = "rc4-md5"			 
+ 		elif [ "$ssencrypt" == "6" ]; then
+ 		 	flag_c = "AEAD_CHACHA20_POLY1305"
+		else
+        	echo "type error, please try again"
+        	exit
+    	fi
+	else
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "------------------------------------------------------------------"
+   		echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
+    	echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
+    	echo -e "    具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/KANIKIG/Multi-EasyGost)"
+    	read -p "请输入: " flag_c
+	fi
 }
 function read_d_port()
-{
-    echo -e "------------------------------------------------------------------"
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
-    read -p "请输入: " flag_d
+{	
+	if [ flag_a == "ss" ]; then
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "请问你要设置ss代理服务的端口?"
+    	read -p "请输入: " flag_d
+	else
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "------------------------------------------------------------------"
+    	echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
+    	read -p "请输入: " flag_d
+	fi
 }
 function writerawconf()
 {
@@ -288,6 +336,26 @@ function decrypt()
         exit
     fi
 }
+function proxy()
+{   
+	echo -e "------------------------------------------------------------------"
+	echo -e "请问您要设置的代理类型: "
+	echo -e "-----------------------------------"
+	echo -e "[1] ss"
+	echo -e "[2] socks5(未完成)"
+	echo -e "-----------------------------------"
+	read -p "请选择代理类型: " numproxy
+		if [ "$numproxy" == "1" ]; then
+			flag_a="ss"
+			ssconf
+		elif [ "$numproxy" == "2" ]; then
+			flag_a="socks"
+			s5conf
+		else
+			echo "type error, please try again"
+			exit
+		fi
+}
 function method()
 {
     if [ $i -eq 1 ]; then
@@ -318,6 +386,8 @@ function method()
             echo "        \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "decryptwss" ]; then
             echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+        elif [ "$is_encrypt" == "ss" ]; then
+            echo "        \"ss://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
         else
             echo "config error"
         fi
@@ -349,6 +419,8 @@ function method()
             echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
         elif [ "$is_encrypt" == "decryptwss" ]; then
             echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >> $gost_conf_path
+        elif [ "$is_encrypt" == "ss" ]; then
+            echo "        \"ss://$d_ip:$s_port@:$d_port\"" >> $gost_conf_path
         else
             echo "config error"
         fi
@@ -357,81 +429,7 @@ function method()
 		exit
     fi
 }
-function ssconf()
-{	echo -e "-----------------------------------"
-	read -p "请输入ss密码: " sspasswd
-	echo -e "------------------------------------------------------------------"
-    echo -e "请问您要设置的ss加密(仅提供常用的几种): "
-    echo -e "-----------------------------------"
-    echo -e "[1] aes-256-gcm"
-    echo -e "[2] aes-256-cfb"
-	echo -e "[3] chacha20-ietf-poly1305"
-	echo -e "[4] chacha20"
-	echo -e "[5] rc4-md5"
-	echo -e "[6] AEAD_CHACHA20_POLY1305"
-    echo -e "-----------------------------------"
-    read -p "请选择ss加密方式: " ssencrypt
-	
-    if [ "$ssencrypt" == "1" ]; then
-		echo ",
-	             \"ss://aes-256-gcm:$sspasswd@:$d_port\"" >> $gost_conf_path
-		echo -e "已选择 aes-256-gcm"
-    elif [ "$ssencrypt" == "2" ]; then
-		echo ",
-	             \"ss://aes-256-cfb:$sspasswd@:$d_port\"" >> $gost_conf_path
-		echo -e "已选择 aes-256-cfb"
-	elif [ "$ssencrypt" == "3" ]; then
-		echo ",
-		 	     \"ss://chacha20-ietf-poly1305:$sspasswd@:$d_port\"" >> $gost_conf_path
-		echo -e "已选择 chacha20-ietf-poly1305"
-	elif [ "$ssencrypt" == "4" ]; then
-		 echo ",
-		 		 \"ss://chacha20:$sspasswd@:$d_port\"" >> $gost_conf_path
-		 echo -e "已选择 chacha20"
-	elif [ "$ssencrypt" == "5" ]; then
-		 echo ",
-		 		 \"ss://rc4-md5:$sspasswd@:$d_port\"" >> $gost_conf_path			 
-		 echo -e "已选择 rc4-md5"
- 	elif [ "$ssencrypt" == "4" ]; then
- 		 echo ",
- 		 		 \"ss://AEAD_CHACHA20_POLY1305:$sspasswd@:$d_port\"" >> $gost_conf_path
- 		 echo -e "已选择 AEAD_CHACHA20_POLY1305"
-	else
-        echo "type error, please try again"
-        exit
-    fi
-}
-function s5conf()
-{
-	exit
-}
-function proxy()
-{
-    echo -e "------------------------------------------------------------------"
-    read -p "是否需要一键安装ss或sock5代理?(y/n 默认:N)" is_proxy
-	case $is_proxy in
-	        [yY][eE][sS] | [yY])
-				echo -e "------------------------------------------------------------------"
-			    echo -e "请问您要设置的代理类型: "
-			    echo -e "-----------------------------------"
-			    echo -e "[1] ss"
-			    echo -e "[2] socks5(未完成)"
-			    echo -e "-----------------------------------"
-			    read -p "请选择代理类型: " numproxy
-			    if [ "$numproxy" == "1" ]; then
-			        ssconf
-			    elif [ "$numproxy" == "2" ]; then
-			        s5conf
-			    else
-			        echo "type error, please try again"
-			        exit
-			    fi
-	            ;;
-	        *)
-	            sleep 2
-	            ;;
-	        esac
-}
+
 function writeconf()
 {
     count_line=$(awk 'END{print NR}' $raw_conf_path)
@@ -487,6 +485,8 @@ function show_all_conf()
             str="ws解密"
         elif [ "$is_encrypt" == "decryptwss" ]; then
             str="wss解密"
+        elif [ "$is_encrypt" == "ss" ]; then
+            str="ss"
         fi
 
         echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
