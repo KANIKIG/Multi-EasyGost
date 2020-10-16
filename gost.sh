@@ -179,7 +179,7 @@ function read_protocol()
 }
 function read_s_port()
 {	
-	if [ flag_a == "ss" ];then
+	if [ "$flag_a" == "ss" ];then
 		echo -e "-----------------------------------"
 		read -p "请输入ss密码: " flag_b
 	else
@@ -191,7 +191,7 @@ function read_s_port()
 }
 function read_d_ip()
 {	
-	if [ flag_a == "ss" ]; then
+	if [ "$flag_a" == "ss" ]; then
 		echo -e "------------------------------------------------------------------"
     	echo -e "请问您要设置的ss加密(仅提供常用的几种): "
     	echo -e "-----------------------------------"
@@ -231,7 +231,7 @@ function read_d_ip()
 }
 function read_d_port()
 {	
-	if [ flag_a == "ss" ]; then
+	if [ "$flag_a" == "ss" ]; then
     	echo -e "------------------------------------------------------------------"
     	echo -e "------------------------------------------------------------------"
     	echo -e "请问你要设置ss代理服务的端口?"
