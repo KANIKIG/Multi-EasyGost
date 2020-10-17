@@ -482,21 +482,21 @@ function show_all_conf()
         if [ "$is_encrypt" == "nonencrypt" ]; then
             str="tcp+udp不加密"
         elif [ "$is_encrypt" == "encrypttls" ]; then
-            str="tls隧道"
+            str="   tls隧道   "
         elif [ "$is_encrypt" == "encryptws" ]; then
-            str="ws隧道"
+            str="    ws隧道   "
         elif [ "$is_encrypt" == "encryptwss" ]; then
-            str="wss隧道"
+            str="   wss隧道   "
         elif [ "$is_encrypt" == "decrypttls" ]; then
-            str="tls解密"
+            str="   tls解密   "
         elif [ "$is_encrypt" == "decryptws" ]; then
-            str="ws解密"
+            str="    ws解密   "
         elif [ "$is_encrypt" == "decryptwss" ]; then
-            str="wss解密"
+            str="   wss解密   "
         elif [ "$is_encrypt" == "ss" ]; then
-            str="ss"
+            str="      ss    "
 		elif [ "$is_encrypt" == "socks" ]; then
-			str="socks5"
+			str="   socks5   "
         fi
 
         echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
