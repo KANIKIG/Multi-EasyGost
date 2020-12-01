@@ -529,7 +529,7 @@ case "$num" in
 9)
   show_all_conf
   read -p "请输入你要删除的配置编号：" numdelete
-  if $numdelete | grep -q '[^0-9]'; then
+  if ($numdelete | grep -q '[^0-9]'); then
       echo "请输入正确数字"
   else
     sed -i "${numdelete}d" $raw_conf_path
