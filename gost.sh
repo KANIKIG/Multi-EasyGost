@@ -529,13 +529,17 @@ case "$num" in
 9)
   show_all_conf
   read -p "请输入你要删除的配置编号：" numdelete
-  sed -i "${numdelete}d" $raw_conf_path
-  rm -rf /etc/gost/config.json
-  confstart
-  writeconf
-  conflast
-  systemctl restart gost
-  echo -e "配置已删除，服务已重启"
+  if $numdelete | grep -q '[^0-9]'; then
+      echo "请输入正确数字"
+  else
+    sed -i "${numdelete}d" $raw_conf_path
+    rm -rf /etc/gost/config.json
+    confstart
+    writeconf
+    conflast
+    systemctl restart gost
+    echo -e "配置已删除，服务已重启"
+  fi
   ;;
 *)
   echo "请输入正确数字 [1-9]"
