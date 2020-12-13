@@ -217,7 +217,7 @@ function read_d_ip() {
     echo -e "-----------------------------------"
     read -p "请输入socks用户名: " flag_c
   elif [[ "$flag_a" == "peer"* ]]; then
-    read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2" flag_c
+    read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2: " flag_c
     touch $flag_c.txt
     echo -e "------------------------------------------------------------------"
     echo -e "您要设置的均衡负载策略: "
@@ -239,6 +239,7 @@ function read_d_ip() {
       exit
     fi
     echo -e "strategy $stra\nmax_fails 1\nfail_timeout 30s\nreload 10s" >>$flag_c.txt
+    echo -e "------------------------------------------------------------------"
     echo -e "已创建均衡负载配置文件$flag_c.txt"
 
   else
@@ -260,7 +261,15 @@ function read_d_port() {
     read -p "请输入: " flag_d
   elif [[ "$flag_a" == "peer"* ]]; then
     peerip
-    echo -e "peer ://:port?ip=$flag_d.txt" >>$flag_d.txt
+    if [ "$flag_a" == "peertls" ]; then
+      echo -e "peer relay+tls://:port?ip=$flag_d.txt" >>$flag_c.txt
+    elif [ "$flag_a" == "peerws" ]; then
+      echo -e "peer relay+ws://:port?ip=$flag_d.txt" >>$flag_c.txt
+    elif [ "$flag_a" == "peerwss" ]; then
+      echo -e "peer relay+wss://:port?ip=$flag_d.txt" >>$flag_c.txt
+    else
+      echo -e "peer ://:port?ip=$flag_d.txt" >>$flag_c.txt
+    fi
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
@@ -400,8 +409,8 @@ function method() {
     if [ "$is_encrypt" == "nonencrypt" ]; then
       echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
-    elif [ "$is_encrypt" == "peerno" ]; then
-      echo "        \"tcp:$s_port?peer=$d_ip.txt\",
+    elif [[ "$is_encrypt" == "peer"* ]]; then
+      echo "        \"tcp://:$s_port?peer=$d_ip.txt\",
         \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "        \"tcp://:$s_port\",
@@ -438,6 +447,9 @@ function method() {
     if [ "$is_encrypt" == "nonencrypt" ]; then
       echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
+    elif [[ "$is_encrypt" == "peer"* ]]; then
+      echo "                \"tcp://:$s_port?peer=$d_ip.txt\",
+                \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "                \"tcp://:$s_port\",
                 \"udp://:$s_port\"
@@ -476,7 +488,7 @@ function method() {
 }
 
 function peerip() {
-  read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2" flag_d
+  read -e -p "请输入落地列表文件名\n自定义但应不重复，不用输入后缀，例如ips1、iplist2: " flag_d
   touch $flag_d.txt
   echo -e "------------------------------------------------------------------"
   echo -e "请依次输入你要均衡负载的落地ip与端口"
@@ -489,9 +501,12 @@ function peerip() {
     read -e -p "是否继续添加转发配置？[Y/n]:" addyn
     [[ -z ${addyn} ]] && addyn="y"
     if [[ ${addyn} == [Nn] ]]; then
+      echo -e "------------------------------------------------------------------"
       echo -e "结束添加落地配置，但您可以编辑对应txt文件修改落地信息，重启gost即可生效"
+      echo -e "------------------------------------------------------------------"
       break
     else
+      echo -e "------------------------------------------------------------------"
       echo -e "继续添加均衡负载落地配置"
     fi
   done
