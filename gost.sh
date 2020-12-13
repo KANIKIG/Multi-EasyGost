@@ -410,8 +410,8 @@ function method() {
       echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [[ "$is_encrypt" == "peer"* ]]; then
-      echo "        \"tcp://:$s_port?peer=$d_ip.txt\",
-        \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
+      echo "        \"tcp://:$s_port?peer=~/$d_ip.txt\",
+        \"udp://:$s_port?peer=~/$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "        \"tcp://:$s_port\",
         \"udp://:$s_port\"
@@ -448,8 +448,8 @@ function method() {
       echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [[ "$is_encrypt" == "peer"* ]]; then
-      echo "                \"tcp://:$s_port?peer=$d_ip.txt\",
-                \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
+      echo "                \"tcp://:$s_port?peer=~/$d_ip.txt\",
+                \"udp://:$s_port?peer=~/$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "                \"tcp://:$s_port\",
                 \"udp://:$s_port\"
