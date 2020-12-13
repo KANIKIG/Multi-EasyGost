@@ -49,6 +49,7 @@ function Installation_dependency() {
   if [[ -z ${gzip_ver} ]]; then
     if [[ ${release} == "centos" ]]; then
       yum update
+      yum install -y wget
       yum install -y gzip
     else
       apt-get update
@@ -149,6 +150,9 @@ function read_protocol() {
   echo -e "[4] 一键安装ss/socks5代理"
   echo -e "说明: 使用gost内置的代理协议，轻量且易于管理"
   echo -e "-----------------------------------"
+  echo -e "[5] 进阶：负载均衡"
+  echo -e "说明: 小白也可以尝试的负载均衡"
+  echo -e "-----------------------------------"
   read -p "请选择: " numprotocol
 
   if [ "$numprotocol" == "1" ]; then
@@ -159,6 +163,8 @@ function read_protocol() {
     decrypt
   elif [ "$numprotocol" == "4" ]; then
     proxy
+  elif [ "$numprotocol" == "5" ]; then
+    enpeer
   else
     echo "type error, please try again"
     exit
@@ -210,6 +216,31 @@ function read_d_ip() {
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "请输入socks用户名: " flag_c
+  elif [ "$flag_a" == "peer*" ]; then
+    read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2" flag_c
+    touch $flag_c.txt
+    echo -e "------------------------------------------------------------------"
+    echo -e "您要设置的均衡负载策略: "
+    echo -e "-----------------------------------"
+    echo -e "[1] round - 轮询"
+    echo -e "[2] random - 随机"
+    echo -e "[3] fifo - 自上而下"
+    echo -e "-----------------------------------"
+    read -p "请选择均衡负载类型: " numstra
+
+    if [ "$numstra" == "1" ]; then
+      stra="round"
+    elif [ "$numstra" == "2" ]; then
+      stra="random"
+    elif [ "$numstra" == "3" ]; then
+      stra="fifo"
+    else
+      echo "type error, please try again"
+      exit
+    fi
+    echo -e "strategy $stra\nmax_fails 1\nfail_timeout 30s\nreload 10s" >>$flag_c.txt
+    echo -e "已创建均衡负载配置文件$flag_c.txt"
+
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
@@ -227,6 +258,9 @@ function read_d_port() {
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要设置socks代理服务的端口?"
     read -p "请输入: " flag_d
+  elif [ "$flag_a" == "peer*" ]; then
+    peerip
+    echo -e "peer ://:port?ip=$flag_d.txt" >>$flag_d.txt
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
@@ -278,9 +312,9 @@ function multiconflast() {
 function encrypt() {
   echo -e "请问您要设置的转发传输类型: "
   echo -e "-----------------------------------"
-  echo -e "[1] tls"
-  echo -e "[2] ws"
-  echo -e "[3] wss"
+  echo -e "[1] tls隧道"
+  echo -e "[2] ws隧道"
+  echo -e "[3] wss隧道"
   echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认开启tcp+udp"
   echo -e "-----------------------------------"
   read -p "请选择转发传输类型: " numencrypt
@@ -291,6 +325,33 @@ function encrypt() {
     flag_a="encryptws"
   elif [ "$numencrypt" == "3" ]; then
     flag_a="encryptwss"
+  else
+    echo "type error, please try again"
+    exit
+  fi
+}
+function enpeer() {
+  echo -e "请问您要设置的均衡负载传输类型: "
+  echo -e "-----------------------------------"
+  echo -e "[1] 不加密转发"
+  echo -e "[2] tls隧道"
+  echo -e "[3] ws隧道"
+  echo -e "[4] wss隧道"
+  echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认同一配置的传输类型相同"
+  echo -e "此脚本仅支持简单型均衡负载，具体可参考官方文档"
+  echo -e "gost均衡负载官方文档：https://docs.ginuerzh.xyz/gost/load-balancing"
+  echo -e "-----------------------------------"
+  read -p "请选择转发传输类型: " numpeer
+
+  if [ "$numpeer" == "1" ]; then
+    flag_a="peerno"
+  elif [ "$numpeer" == "2" ]; then
+    flag_a="peertls"
+  elif [ "$numpeer" == "3" ]; then
+    flag_a="peerws"
+  elif [ "$numpeer" == "4" ]; then
+    flag_a="peerwss"
+
   else
     echo "type error, please try again"
     exit
@@ -339,6 +400,9 @@ function method() {
     if [ "$is_encrypt" == "nonencrypt" ]; then
       echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "peerno" ]; then
+      echo "        \"tcp:$s_port?peer=$d_ip.txt\",
+        \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "        \"tcp://:$s_port\",
         \"udp://:$s_port\"
@@ -411,6 +475,28 @@ function method() {
   fi
 }
 
+function peerip() {
+  read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2" flag_d
+  touch $flag_d.txt
+  echo -e "------------------------------------------------------------------"
+  echo -e "请依次输入你要均衡负载的落地ip与端口"
+  while true; do
+    echo -e "请问你要将本机从${flag_b}接收到的流量转发向的IP或域名?"
+    read -p "请输入: " peer_ip
+    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${peer_ip}的哪个端口?"
+    read -p "请输入: " peer_port
+    echo -e "$peer_ip:$peer_port" >>$flag_d.txt
+    read -e -p "是否继续添加转发配置？[Y/n]:" addyn
+    [[ -z ${addyn} ]] && addyn="y"
+    if [[ ${addyn} == [Nn] ]]; then
+      echo -e "结束添加落地配置，但您可以编辑对应txt文件修改落地信息，重启gost即可生效"
+      break
+    else
+      echo -e "继续添加均衡负载落地配置"
+    fi
+  done
+}
+
 function writeconf() {
   count_line=$(awk 'END{print NR}' $raw_conf_path)
   for ((i = 1; i <= $count_line; i++)); do
@@ -456,6 +542,14 @@ function show_all_conf() {
       str="  ws隧道 "
     elif [ "$is_encrypt" == "encryptwss" ]; then
       str=" wss隧道 "
+    elif [ "$is_encrypt" == "peerno" ]; then
+      str=" 不加密均衡负载 "
+    elif [ "$is_encrypt" == "peertls" ]; then
+      str=" tls隧道均衡负载 "
+    elif [ "$is_encrypt" == "peerws" ]; then
+      str="  ws隧道均衡负载 "
+    elif [ "$is_encrypt" == "peerwss" ]; then
+      str=" wss隧道均衡负载 "
     elif [ "$is_encrypt" == "decrypttls" ]; then
       str=" tls解密 "
     elif [ "$is_encrypt" == "decryptws" ]; then
@@ -529,8 +623,7 @@ case "$num" in
 9)
   show_all_conf
   read -p "请输入你要删除的配置编号：" numdelete
-  if echo $numdelete | grep -q '[0-9]'
-  then
+  if echo $numdelete | grep -q '[0-9]'; then
     sed -i "${numdelete}d" $raw_conf_path
     rm -rf /etc/gost/config.json
     confstart
