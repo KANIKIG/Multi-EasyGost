@@ -216,7 +216,7 @@ function read_d_ip() {
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "请输入socks用户名: " flag_c
-  elif [ "$flag_a" == "peer*" ]; then
+  elif [[ "$flag_a" == "peer"* ]]; then
     read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2" flag_c
     touch $flag_c.txt
     echo -e "------------------------------------------------------------------"
@@ -258,7 +258,7 @@ function read_d_port() {
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要设置socks代理服务的端口?"
     read -p "请输入: " flag_d
-  elif [ "$flag_a" == "peer*" ]; then
+  elif [[ "$flag_a" == "peer"* ]]; then
     peerip
     echo -e "peer ://:port?ip=$flag_d.txt" >>$flag_d.txt
   else
