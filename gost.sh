@@ -217,7 +217,8 @@ function read_d_ip() {
     echo -e "-----------------------------------"
     read -p "请输入socks用户名: " flag_c
   elif [[ "$flag_a" == "peer"* ]]; then
-    read -e -p "请输入均衡负载配置文件名\n自定义但应不重复，不用输入后缀，例如peer1、peer2: " flag_c
+    echo -e "请输入均衡负载配置文件名"
+    read -e -p "自定义但应不重复，不用输入后缀，例如peer1、peer2: " flag_c
     touch $flag_c.txt
     echo -e "------------------------------------------------------------------"
     echo -e "您要设置的均衡负载策略: "
@@ -262,13 +263,13 @@ function read_d_port() {
   elif [[ "$flag_a" == "peer"* ]]; then
     peerip
     if [ "$flag_a" == "peertls" ]; then
-      echo -e "peer relay+tls://:port?ip=$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+tls://:port?ip=~/$flag_d.txt" >>$flag_c.txt
     elif [ "$flag_a" == "peerws" ]; then
-      echo -e "peer relay+ws://:port?ip=$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+ws://:port?ip=~/$flag_d.txt" >>$flag_c.txt
     elif [ "$flag_a" == "peerwss" ]; then
-      echo -e "peer relay+wss://:port?ip=$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+wss://:port?ip=~/$flag_d.txt" >>$flag_c.txt
     else
-      echo -e "peer ://:port?ip=$flag_d.txt" >>$flag_c.txt
+      echo -e "peer ://:port?ip=~/$flag_d.txt" >>$flag_c.txt
     fi
   else
     echo -e "------------------------------------------------------------------"
@@ -488,7 +489,8 @@ function method() {
 }
 
 function peerip() {
-  read -e -p "请输入落地列表文件名\n自定义但应不重复，不用输入后缀，例如ips1、iplist2: " flag_d
+  echo -e "请输入落地列表文件名"
+  read -e -p "自定义但应不重复，不用输入后缀，例如ips1、iplist2: " flag_d
   touch $flag_d.txt
   echo -e "------------------------------------------------------------------"
   echo -e "请依次输入你要均衡负载的落地ip与端口"
