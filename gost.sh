@@ -263,13 +263,13 @@ function read_d_port() {
   elif [[ "$flag_a" == "peer"* ]]; then
     peerip
     if [ "$flag_a" == "peertls" ]; then
-      echo -e "peer relay+tls://:port?ip=~/$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+tls://:?ip=$flag_d.txt" >>$flag_c.txt
     elif [ "$flag_a" == "peerws" ]; then
-      echo -e "peer relay+ws://:port?ip=~/$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+ws://:?ip=$flag_d.txt" >>$flag_c.txt
     elif [ "$flag_a" == "peerwss" ]; then
-      echo -e "peer relay+wss://:port?ip=~/$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay+wss://:?ip=$flag_d.txt" >>$flag_c.txt
     else
-      echo -e "peer relay://[host]:port?ip=~/$flag_d.txt" >>$flag_c.txt
+      echo -e "peer relay://:?ip=$flag_d.txt" >>$flag_c.txt
     fi
   else
     echo -e "------------------------------------------------------------------"
@@ -411,7 +411,7 @@ function method() {
       echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [[ "$is_encrypt" == "peer"* ]]; then
-      echo "        \":$s_port?peer=~/$d_ip.txt\"" >>$gost_conf_path
+      echo "        \":$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "        \"tcp://:$s_port\",
         \"udp://:$s_port\"
@@ -448,8 +448,8 @@ function method() {
       echo "                \"tcp://:$s_port/$d_ip:$d_port\",
                 \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [[ "$is_encrypt" == "peer"* ]]; then
-      echo "                \"tcp://:$s_port?peer=~/$d_ip.txt\",
-                \"udp://:$s_port?peer=~/$d_ip.txt\"" >>$gost_conf_path
+      echo "                \"tcp://:$s_port?peer=$d_ip.txt\",
+                \"udp://:$s_port?peer=$d_ip.txt\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "                \"tcp://:$s_port\",
                 \"udp://:$s_port\"
