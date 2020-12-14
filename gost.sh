@@ -150,8 +150,8 @@ function read_protocol() {
   echo -e "[4] 一键安装ss/socks5代理"
   echo -e "说明: 使用gost内置的代理协议，轻量且易于管理"
   echo -e "-----------------------------------"
-  echo -e "[5] 进阶：负载均衡(未完成)"
-  echo -e "说明: 小白也可以尝试的负载均衡"
+  echo -e "[5] 进阶：多落地均衡负载"
+  echo -e "说明: 支持各种加密方式的简单均衡负载"
   echo -e "-----------------------------------"
   read -p "请选择: " numprotocol
 
@@ -229,11 +229,11 @@ function read_d_ip() {
       echo -e "请问你要将本机从${flag_b}接收到的流量转发向${peer_ip}的哪个端口?"
       read -p "请输入: " peer_port
       echo -e "$peer_ip:$peer_port" >>$flag_c.txt
-      read -e -p "是否继续添加转发配置？[Y/n]:" addyn
+      read -e -p "是否继续添加落地？[Y/n]:" addyn
       [[ -z ${addyn} ]] && addyn="y"
       if [[ ${addyn} == [Nn] ]]; then
         echo -e "------------------------------------------------------------------"
-        echo -e "已在root目录创建$flag_c.txt，您可以随时编辑txt文件修改落地信息，重启gost即可生效"
+        echo -e "已在root目录创建$flag_c.txt，您可以随时编辑该文件修改落地信息，重启gost即可生效"
         echo -e "------------------------------------------------------------------"
         break
       else
