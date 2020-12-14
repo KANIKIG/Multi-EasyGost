@@ -33,12 +33,14 @@
 - 新支持传输类型
   - relay+ws
   - relay+wss
-
 - 落地机一键创建ss或socks5代理 (gost内置)
+- 支持多传输类型的多落地简单型均衡负载
 
 ## 功能展示
 
-![1](https://i.loli.net/2020/10/16/pZSQqlXyYmJEnt1.png)
+![iShot2020-12-14下午05.42.23.png](https://i.loli.net/2020/12/14/q75PO6s2DMIcUKB.png)
+
+![iShot2020-12-14下午05.42.39.png](https://i.loli.net/2020/12/14/vzpGlWmPtCrneOY.png)
 
 ![2](https://i.loli.net/2020/10/16/fBHgwStVQxc821z.png)
 
@@ -46,3 +48,6 @@
 
 ![4](https://i.loli.net/2020/10/16/lt6uAzI5X7yYWhr.png)
 
+![iShot2020-12-14下午05.43.46.png](https://i.loli.net/2020/12/14/YjiFTMCKs8lANbI.png)
+
+![iShot2020-12-14下午05.43.11.png](https://i.loli.net/2020/12/14/VIcQSsoUaqpzx5T.png)
