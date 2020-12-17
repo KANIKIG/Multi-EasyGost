@@ -455,19 +455,19 @@ function method() {
 	],
 	\"ChainNodes\": [
 		\"relay+wss://$d_ip:$d_port\"" >>$gost_conf_path
-		elif [ "$is_encrypt" == "peertls" ]; then
+    elif [ "$is_encrypt" == "peertls" ]; then
       echo "        \"tcp://:$s_port\",
     	\"udp://:$s_port\"
 	],
 	\"ChainNodes\": [
     	\"relay+tls://:?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
-		elif [ "$is_encrypt" == "peerws" ]; then
+    elif [ "$is_encrypt" == "peerws" ]; then
       echo "        \"tcp://:$s_port\",
     	\"udp://:$s_port\"
 	],
 	\"ChainNodes\": [
     	\"relay+ws://:?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
-	elif [ "$is_encrypt" == "peerwss" ]; then
+    elif [ "$is_encrypt" == "peerwss" ]; then
       echo "        \"tcp://:$s_port\",
     	\"udp://:$s_port\"
 	],
