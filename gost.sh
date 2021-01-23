@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.1"
+shell_version="1.0.2"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -619,6 +619,45 @@ function show_all_conf() {
   done
 }
 
+cron_restart(){
+    echo -e "------------------------------------------------------------------"
+    echo -e "gost定时重启任务: "
+    echo -e "-----------------------------------"
+    echo -e "[1] 配置gost定时重启任务"
+    echo -e "[2] 删除gost定时重启任务"
+    echo -e "-----------------------------------"
+    read -p "请选择: " numcron
+    if [ "$numcron" == "1" ]; then
+        echo -e "------------------------------------------------------------------"
+        echo -e "gost定时重启任务类型: "
+        echo -e "-----------------------------------"
+        echo -e "[1] 每？小时重启"
+        echo -e "[2] 每日？点重启"
+        echo -e "-----------------------------------"
+        read -p "请选择: " numcrontype
+        if [ "$numcrontype" == "1" ]; then
+            echo -e "-----------------------------------"
+            read -p "每？小时重启: " cronhr
+            echo "0 0 */$cronhr * * ? * systemctl restart gost" >>/etc/crontab
+            echo -e "定时重启设置成功！"
+        elif [ "$numcrontype" == "2" ]; then
+            echo -e "-----------------------------------"
+            read -p "每日？点重启: " cronhr
+            echo "0 0 $cronhr * * ? systemctl restart gost" >>/etc/crontab
+            echo -e "定时重启设置成功！"
+        else
+            echo "type error, please try again"
+            exit
+        fi
+    elif [ "$numcron" == "2" ]; then
+      sed -i "/gost/d" /etc/crontab
+      echo -e "定时重启任务删除完成！"
+    else
+      echo "type error, please try again"
+      exit
+    fi
+}
+
 update_sh() {
     ol_version=$(curl -L -s https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
     if [[ "$shell_version" != "$ol_version" ]]; then
@@ -634,7 +673,7 @@ update_sh() {
 
         esac
     else
-        echo -e "当前版本为最新版本!"
+        echo -e "                 ${Green_font_prefix}当前版本为最新版本!${Font_color_suffix}"
     fi
 
 }
@@ -644,7 +683,7 @@ echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefi
   ----------- KANIKIG -----------
   特性: (1)本脚本采用systemd及gost配置文件对gost进行管理
         (2)能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效
-		(3)机器reboot后转发不失效
+        (3)机器reboot后转发不失效
   功能: (1)tcp+udp不加密转发, (2)中转机加密转发, (3)落地机解密对接转发
   帮助文档：https://github.com/KANIKIG/Multi-EasyGost
 
@@ -659,6 +698,8 @@ echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefi
  ${Green_font_prefix}7.${Font_color_suffix} 新增gost转发配置
  ${Green_font_prefix}8.${Font_color_suffix} 查看现有gost配置
  ${Green_font_prefix}9.${Font_color_suffix} 删除一则gost配置
+————————————
+ ${Green_font_prefix}10.${Font_color_suffix} gost定时重启配置
 ————————————" && echo
 read -e -p " 请输入数字 [1-9]:" num
 case "$num" in
@@ -709,6 +750,9 @@ case "$num" in
     echo "请输入正确数字"
   fi
   ;;
+10)
+  cron_restart
+    ;;
 *)
   echo "请输入正确数字 [1-9]"
   ;;
