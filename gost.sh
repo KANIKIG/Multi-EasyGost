@@ -673,7 +673,7 @@ update_sh() {
 
         esac
     else
-        echo -e "                 ${Green_font_prefix}当前版本为最新版本!${Font_color_suffix}"
+        echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
     fi
 
 }
