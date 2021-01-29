@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.3"
+shell_version="1.0.4"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -694,6 +694,14 @@ function show_all_conf() {
       str="   ss   "
     elif [ "$is_encrypt" == "socks" ]; then
       str=" socks5 "
+    elif [ "$is_encrypt" == "cdnno" ]; then
+      str="不加密转发CDN"
+    elif [ "$is_encrypt" == "cdnws" ]; then
+      str="ws隧道转发CDN"
+    elif [ "$is_encrypt" == "cdnwss" ]; then
+      str="wss隧道转发CDN"
+    else
+      str=""
     fi
 
     echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
