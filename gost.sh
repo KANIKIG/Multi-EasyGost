@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.2"
+shell_version="1.0.3"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -169,6 +169,9 @@ function read_protocol() {
   echo -e "[5] 进阶：多落地均衡负载"
   echo -e "说明: 支持各种加密方式的简单均衡负载"
   echo -e "-----------------------------------"
+  echo -e "[6] 进阶：转发CDN自选节点"
+  echo -e "说明: 只需在中转机设置"
+  echo -e "-----------------------------------"
   read -p "请选择: " numprotocol
 
   if [ "$numprotocol" == "1" ]; then
@@ -181,6 +184,8 @@ function read_protocol() {
     proxy
   elif [ "$numprotocol" == "5" ]; then
     enpeer
+  elif [ "$numprotocol" == "6" ]; then
+    cdn
   else
     echo "type error, please try again"
     exit
@@ -257,7 +262,30 @@ function read_d_ip() {
         echo -e "继续添加均衡负载落地配置"
       fi
     done
-
+  elif [[ "$flag_a" == "cdn"* ]]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "将本机从${flag_b}接收到的流量转发向的自选ip:"
+    read -p "请输入: " flag_c
+    if [ "$flag_a" == "cdnno" ]; then
+      echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
+      echo -e "[1] 80"
+      echo -e "[2] 443"
+      read -p "请选择端口: " cdnport
+        if [ "$cdnport" == "1" ]; then
+          flag_c="$flag_c:80"
+        elif [ "$cdnport" == "2" ]; then
+          flag_c="$flag_c:443"
+        else
+          echo "type error, please try again"
+          exit
+        fi
+    elif [ "$flag_a" == "cdnws" ]; then
+      echo -e "ws将默认转发至80端口"
+      flag_c="$flag_c:80"
+    else
+      echo -e "wss将默认转发至443端口"
+      flag_c="$flag_c:443"
+    fi
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
@@ -295,7 +323,9 @@ function read_d_port() {
       echo "type error, please try again"
       exit
     fi
-
+  elif [[ "$flag_a" == "cdn"* ]]; then
+    echo -e "------------------------------------------------------------------"
+    read -p "请输入host:" flag_d
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
@@ -392,6 +422,28 @@ function enpeer() {
     exit
   fi
 }
+function cdn() {
+  echo -e "请问您要设置的CDN传输类型: "
+  echo -e "-----------------------------------"
+  echo -e "[1] 不加密转发"
+  echo -e "[2] ws隧道-80"
+  echo -e "[3] wss隧道-443"
+  echo -e "注意: 同一则转发，中转与落地传输类型必须对应！"
+  echo -e "此功能只需在中转机设置，落地机若用隧道，流量入口必须是80/443，之后套cdn即可"
+  echo -e "-----------------------------------"
+  read -p "请选择CDN转发传输类型: " numcdn
+
+  if [ "$numcdn" == "1" ]; then
+    flag_a="cdnno"
+  elif [ "$numcdn" == "2" ]; then
+    flag_a="cdnws"
+  elif [ "$numcdn" == "3" ]; then
+    flag_a="cdnwss"
+  else
+    echo "type error, please try again"
+    exit
+  fi
+}
 function decrypt() {
   echo -e "请问您要设置的解密传输类型: "
   echo -e "-----------------------------------"
@@ -435,6 +487,9 @@ function method() {
     if [ "$is_encrypt" == "nonencrypt" ]; then
       echo "        \"tcp://:$s_port/$d_ip:$d_port\",
         \"udp://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnno" ]; then
+      echo "        \"tcp://:$s_port/$d_ip?host=$d_port\",
+        \"udp://:$s_port/$d_ip?host=$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "peerno" ]; then
       echo "        \"tcp://:$s_port?ip=/root/$d_ip.txt&strategy=$d_port\",
         \"udp://:$s_port?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
@@ -474,6 +529,18 @@ function method() {
 	],
 	\"ChainNodes\": [
     	\"relay+wss://:?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnws" ]; then
+      echo "        \"tcp://:$s_port\",
+    	\"udp://:$s_port\"
+	],
+	\"ChainNodes\": [
+    	\"relay+ws://$d_ip?host=$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnwss" ]; then
+      echo "        \"tcp://:$s_port\",
+    	\"udp://:$s_port\"
+	],
+	\"ChainNodes\": [
+    	\"relay+wss://$d_ip?host=$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decrypttls" ]; then
       echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decryptws" ]; then
@@ -619,62 +686,62 @@ function show_all_conf() {
   done
 }
 
-cron_restart(){
+cron_restart() {
+  echo -e "------------------------------------------------------------------"
+  echo -e "gost定时重启任务: "
+  echo -e "-----------------------------------"
+  echo -e "[1] 配置gost定时重启任务"
+  echo -e "[2] 删除gost定时重启任务"
+  echo -e "-----------------------------------"
+  read -p "请选择: " numcron
+  if [ "$numcron" == "1" ]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "gost定时重启任务: "
+    echo -e "gost定时重启任务类型: "
     echo -e "-----------------------------------"
-    echo -e "[1] 配置gost定时重启任务"
-    echo -e "[2] 删除gost定时重启任务"
+    echo -e "[1] 每？小时重启"
+    echo -e "[2] 每日？点重启"
     echo -e "-----------------------------------"
-    read -p "请选择: " numcron
-    if [ "$numcron" == "1" ]; then
-        echo -e "------------------------------------------------------------------"
-        echo -e "gost定时重启任务类型: "
-        echo -e "-----------------------------------"
-        echo -e "[1] 每？小时重启"
-        echo -e "[2] 每日？点重启"
-        echo -e "-----------------------------------"
-        read -p "请选择: " numcrontype
-        if [ "$numcrontype" == "1" ]; then
-            echo -e "-----------------------------------"
-            read -p "每？小时重启: " cronhr
-            echo "0 0 */$cronhr * * ? * systemctl restart gost" >>/etc/crontab
-            echo -e "定时重启设置成功！"
-        elif [ "$numcrontype" == "2" ]; then
-            echo -e "-----------------------------------"
-            read -p "每日？点重启: " cronhr
-            echo "0 0 $cronhr * * ? systemctl restart gost" >>/etc/crontab
-            echo -e "定时重启设置成功！"
-        else
-            echo "type error, please try again"
-            exit
-        fi
-    elif [ "$numcron" == "2" ]; then
-      sed -i "/gost/d" /etc/crontab
-      echo -e "定时重启任务删除完成！"
+    read -p "请选择: " numcrontype
+    if [ "$numcrontype" == "1" ]; then
+      echo -e "-----------------------------------"
+      read -p "每？小时重启: " cronhr
+      echo "0 0 */$cronhr * * ? * systemctl restart gost" >>/etc/crontab
+      echo -e "定时重启设置成功！"
+    elif [ "$numcrontype" == "2" ]; then
+      echo -e "-----------------------------------"
+      read -p "每日？点重启: " cronhr
+      echo "0 0 $cronhr * * ? systemctl restart gost" >>/etc/crontab
+      echo -e "定时重启设置成功！"
     else
       echo "type error, please try again"
       exit
     fi
+  elif [ "$numcron" == "2" ]; then
+    sed -i "/gost/d" /etc/crontab
+    echo -e "定时重启任务删除完成！"
+  else
+    echo "type error, please try again"
+    exit
+  fi
 }
 
 update_sh() {
-    ol_version=$(curl -L -s https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
-    if [[ "$shell_version" != "$ol_version" ]]; then
-        echo -e "存在新版本，是否更新 [Y/N]?"
-        read -r update_confirm
-        case $update_confirm in
-        [yY][eE][sS] | [yY])
-            wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
-            echo -e "更新完成"
-            exit 0
-            ;;
-        *) ;;
+  ol_version=$(curl -L -s https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
+  if [[ "$shell_version" != "$ol_version" ]]; then
+    echo -e "存在新版本，是否更新 [Y/N]?"
+    read -r update_confirm
+    case $update_confirm in
+    [yY][eE][sS] | [yY])
+      wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
+      echo -e "更新完成"
+      exit 0
+      ;;
+    *) ;;
 
-        esac
-    else
-        echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
-    fi
+    esac
+  else
+    echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
+  fi
 
 }
 
@@ -752,7 +819,7 @@ case "$num" in
   ;;
 10)
   cron_restart
-    ;;
+  ;;
 *)
   echo "请输入正确数字 [1-9]"
   ;;
