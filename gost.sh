@@ -561,6 +561,9 @@ function method() {
     elif [ "$is_encrypt" == "peerno" ]; then
       echo "                \"tcp://:$s_port?ip=/root/$d_ip.txt&strategy=$d_port\",
                 \"udp://:$s_port?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnno" ]; then
+      echo "                \"tcp://:$s_port/$d_ip?host=$d_port\",
+                \"udp://:$s_port/$d_ip?host=$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encrypttls" ]; then
       echo "                \"tcp://:$s_port\",
                 \"udp://:$s_port\"
@@ -597,6 +600,18 @@ function method() {
             ],
             \"ChainNodes\": [
                 \"relay+wss://:?ip=/root/$d_ip.txt&strategy=$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnws" ]; then
+      echo "                \"tcp://:$s_port\",
+                \"udp://:$s_port\"
+            ],
+            \"ChainNodes\": [
+                \"relay+ws://$d_ip?host=$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "cdnwss" ]; then
+      echo "                 \"tcp://:$s_port\",
+                \"udp://:$s_port\"
+            ],
+            \"ChainNodes\": [
+                \"relay+wss://$d_ip?host=$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decrypttls" ]; then
       echo "                \"relay+tls://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decryptws" ]; then
