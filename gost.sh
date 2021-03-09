@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.4"
+shell_version="1.0.5"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -749,23 +749,26 @@ cron_restart() {
 }
 
 update_sh() {
-  ol_version=$(curl -L -s https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
-  if [[ "$shell_version" != "$ol_version" ]]; then
-    echo -e "存在新版本，是否更新 [Y/N]?"
-    read -r update_confirm
-    case $update_confirm in
-    [yY][eE][sS] | [yY])
-      wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
-      echo -e "更新完成"
-      exit 0
-      ;;
-    *) ;;
+  ol_version=$(curl -L -s --connect-timeout 5 https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
+  if [ -n "$ol_version" ];then
+    if [[ "$shell_version" != "$ol_version" ]]; then
+      echo -e "存在新版本，是否更新 [Y/N]?"
+      read -r update_confirm
+      case $update_confirm in
+      [yY][eE][sS] | [yY])
+        wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
+        echo -e "更新完成"
+        exit 0
+        ;;
+      *) ;;
 
-    esac
+      esac
+    else
+      echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
+    fi
   else
-    echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
+    ehco -e "                 ${Green_font_prefix}脚本最新版本获取失败，请检查与github的连接！${Font_color_suffix}"
   fi
-
 }
 
 update_sh
