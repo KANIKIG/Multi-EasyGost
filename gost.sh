@@ -393,7 +393,7 @@ function encrypt() {
     echo -e "[1] 是"
     echo -e "[2] 否"
     echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
-    read -e -p "落地机是否开启了自定义tls证书？(默认为否):" is_cert
+    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   elif [ "$numencrypt" == "2" ]; then
     flag_a="encryptws"
   elif [ "$numencrypt" == "3" ]; then
