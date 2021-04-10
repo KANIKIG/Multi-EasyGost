@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.7"
+shell_version="1.0.8"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -174,10 +174,6 @@ function read_protocol() {
   echo -e "[6] 进阶：转发CDN自选节点"
   echo -e "说明: 只需在中转机设置"
   echo -e "-----------------------------------"
-  echo -e "[7] 进阶：配置自定义TLS证书"
-  echo -e "说明: 仅落地机配置即可默认使用的gost内置的证书可能带来安全问题，使用自定义证书提高安全性"
-  echo -e "     配置后对本机所有tls/wss解密生效，无需再次设置"
-  echo -e "-----------------------------------"
   read -p "请选择: " numprotocol
 
   if [ "$numprotocol" == "1" ]; then
@@ -192,8 +188,6 @@ function read_protocol() {
     enpeer
   elif [ "$numprotocol" == "6" ]; then
     cdn
-  elif [ "$numprotocol" == "7" ]; then
-    cert
   else
     echo "type error, please try again"
     exit
@@ -295,6 +289,9 @@ function read_d_ip() {
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
     echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
     echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/KANIKIG/Multi-EasyGost)"
+    if [ "$is_cert" == "1" ]; then
+      echo -e "注意: 落地机开启自定义tls证书，务必填写${Red_font_prefix}域名${Font_color_suffix}"
+    fi
     read -p "请输入: " flag_c
   fi
 }
@@ -395,7 +392,7 @@ function encrypt() {
     flag_a="encrypttls"
     echo -e "[1] 是"
     echo -e "[2] 否"
-    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写域名而不是ip"
+    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
     read -e -p "落地机是否开启了自定义tls证书？(默认为否):" is_cert
   elif [ "$numencrypt" == "2" ]; then
     flag_a="encryptws"
@@ -403,7 +400,7 @@ function encrypt() {
     flag_a="encryptwss"
     echo -e "[1] 是"
     echo -e "[2] 否"
-    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写域名而不是ip"
+    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
     read -e -p "落地机是否开启了自定义tls证书？(默认为否):" is_cert
   else
     echo "type error, please try again"
@@ -464,19 +461,24 @@ function cert() {
   echo -e "[1] ACME一键申请证书"
   echo -e "[2] 手动上传证书"
   echo -e "-----------------------------------"
+  echo -e "说明: 仅用于落地机配置，默认使用的gost内置的证书可能带来安全问题，使用自定义证书提高安全性"
+  echo -e "     配置后对本机所有tls/wss解密生效，无需再次设置"
   read -p "请选择证书生成方式: " numcert
 
   if [ "$numcert" == "1" ]; then
     echo -e "-----------------------------------"
-    echo -e "请确认本机80端口未被占用，且已安装socat，否则会申请失败"
+    echo -e "请确认本机${Red_font_prefix}80端口${Font_color_suffix}未被占用，且已安装${Red_font_prefix}socat${Font_color_suffix}，否则会申请失败"
     echo -e "socat安装命令  Ubuntu/Debian：apt-get install -y socat ；Centos： yum install -y socat"
     read -p "请输入解析到本机的域名：" domain
     curl https://get.acme.sh | sh
     echo -e "ACME证书申请程序安装成功"
     if "$HOME"/.acme.sh/acme.sh --issue -d "${domain}" --standalone -k ec-256 --force; then
-    echo -e "SSL 证书生成成功，默认申请高安全性的ECC证书"
-      if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath $HOME/gost_cert/cert.pem --keypath $HOME/gost_cert/key.pem --force; then
-        echo -e "SSL 证书配置成功，且会自动续签，证书及秘钥位于用户目录下的 gost_cert 目录"
+      echo -e "SSL 证书生成成功，默认申请高安全性的ECC证书"
+      if [ ! -d "$HOME/gost_cert" ]; then
+        mkdir $HOME/gost_cert
+      fi
+      if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath $HOME/gost_cert/cert.pem --keypath $HOME/gost_cert/key.pem --ecc --force; then
+        echo -e "SSL 证书配置成功，且会自动续签，证书及秘钥位于用户目录下的 ${Red_font_prefix}gost_cert${Font_color_suffix} 目录"
         echo -e "证书目录名与证书文件名请勿更改; 删除 gost_cert 目录后用脚本重启,即自动启用gost内置证书"
         echo -e "-----------------------------------"
       fi
@@ -489,7 +491,7 @@ function cert() {
       mkdir $HOME/gost_cert
     fi
     echo -e "-----------------------------------"
-    echo -e "已在用户目录建立 gost_cert 目录，请将证书文件 cert.pem 与秘钥文件 key.pem 上传到该目录"
+    echo -e "已在用户目录建立 ${Red_font_prefix}gost_cert${Font_color_suffix} 目录，请将证书文件 cert.pem 与秘钥文件 key.pem 上传到该目录"
     echo -e "证书与秘钥文件名必须与上述一致，目录名也请勿更改"
     echo -e "上传成功后，用脚本重启gost会自动启用，无需再设置; 删除 gost_cert 目录后用脚本重启,即重新启用gost内置证书"
     echo -e "-----------------------------------"
@@ -561,7 +563,7 @@ function method() {
     	\"relay+ws://$d_ip:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "encryptwss" ]; then
       echo "        \"tcp://:$s_port\",
-		\"udp://:$s_port\"
+		  \"udp://:$s_port\"
 	],
 	\"ChainNodes\": [
 		\"relay+wss://$d_ip:$d_port\"" >>$gost_conf_path
@@ -676,17 +678,17 @@ function method() {
                 \"relay+wss://$d_ip?host=$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decrypttls" ]; then
       if [ -d "$HOME/gost_cert" ]; then
-        echo "        \"relay+tls://:$s_port/$d_ip:$d_port?cert=/root/gost_cert/cert.pem&key=/root/gost_cert/key.pem\"" >>$gost_conf_path
+        echo "        		  \"relay+tls://:$s_port/$d_ip:$d_port?cert=/root/gost_cert/cert.pem&key=/root/gost_cert/key.pem\"" >>$gost_conf_path
       else
-        echo "        \"relay+tls://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
+        echo "        		  \"relay+tls://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
       fi
     elif [ "$is_encrypt" == "decryptws" ]; then
       echo "        		  \"relay+ws://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "decryptwss" ]; then
       if [ -d "$HOME/gost_cert" ]; then
-        echo "        \"relay+wss://:$s_port/$d_ip:$d_port?cert=/root/gost_cert/cert.pem&key=/root/gost_cert/key.pem\"" >>$gost_conf_path
+        echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port?cert=/root/gost_cert/cert.pem&key=/root/gost_cert/key.pem\"" >>$gost_conf_path
       else
-        echo "        \"relay+wss://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
+        echo "        		  \"relay+wss://:$s_port/$d_ip:$d_port\"" >>$gost_conf_path
       fi
     elif [ "$is_encrypt" == "ss" ]; then
       echo "        \"ss://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
@@ -863,6 +865,7 @@ echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefi
  ${Green_font_prefix}9.${Font_color_suffix} 删除一则gost配置
 ————————————
  ${Green_font_prefix}10.${Font_color_suffix} gost定时重启配置
+ ${Green_font_prefix}11.${Font_color_suffix} 自定义TLS证书配置
 ————————————" && echo
 read -e -p " 请输入数字 [1-9]:" num
 case "$num" in
@@ -915,6 +918,9 @@ case "$num" in
   ;;
 10)
   cron_restart
+  ;;
+11)
+  cert
   ;;
 *)
   echo "请输入正确数字 [1-9]"
