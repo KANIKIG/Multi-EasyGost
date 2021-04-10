@@ -289,7 +289,7 @@ function read_d_ip() {
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
     echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
     echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/KANIKIG/Multi-EasyGost)"
-    if [ "$is_cert" == "1" ]; then
+    if [[ ${is_cert} == [Yy] ]]; then
       echo -e "注意: 落地机开启自定义tls证书，务必填写${Red_font_prefix}域名${Font_color_suffix}"
     fi
     read -p "请输入: " flag_c
@@ -331,7 +331,7 @@ function read_d_port() {
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
     read -p "请输入: " flag_d
-    if [ "$is_cert" == "1" ]; then
+    if [[ ${is_cert} == [Yy] ]]; then
       flag_d="$flag_d?secure=true"
     fi
   fi
@@ -390,18 +390,14 @@ function encrypt() {
 
   if [ "$numencrypt" == "1" ]; then
     flag_a="encrypttls"
-    echo -e "[1] 是"
-    echo -e "[2] 否"
     echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
     read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   elif [ "$numencrypt" == "2" ]; then
     flag_a="encryptws"
   elif [ "$numencrypt" == "3" ]; then
     flag_a="encryptwss"
-    echo -e "[1] 是"
-    echo -e "[2] 否"
     echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
-    read -e -p "落地机是否开启了自定义tls证书？(默认为否):" is_cert
+    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   else
     echo "type error, please try again"
     exit
