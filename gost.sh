@@ -481,7 +481,7 @@ function cert() {
         echo -e "-----------------------------------"
       fi
     else
-      print_error "SSL 证书生成失败"
+      echo -e "SSL 证书生成失败"
       exit 1
     fi
   elif [ "$numcert" == "2" ]; then
