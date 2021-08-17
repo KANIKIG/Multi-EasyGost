@@ -2,7 +2,7 @@
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
 Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-shell_version="1.0.8"
+shell_version="1.1.0"
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
@@ -95,7 +95,7 @@ function Install_ct() {
   [[ -z ${addyn} ]] && addyn="n"
   if [[ ${addyn} == [Yy] ]]; then
     rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost-linux-amd64-2.11.1.gz
+    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost-linux-"$bit"-"$ct_new_ver".gz
     gunzip gost-linux-"$bit"-"$ct_new_ver".gz
     mv gost-linux-"$bit"-"$ct_new_ver" gost
     mv gost /usr/bin/gost
@@ -462,26 +462,60 @@ function cert() {
   read -p "请选择证书生成方式: " numcert
 
   if [ "$numcert" == "1" ]; then
-    echo -e "-----------------------------------"
-    echo -e "请确认本机${Red_font_prefix}80端口${Font_color_suffix}未被占用，且已安装${Red_font_prefix}socat${Font_color_suffix}，否则会申请失败"
-    echo -e "socat安装命令  Ubuntu/Debian：apt-get install -y socat ；Centos： yum install -y socat"
+    check_sys
+    if [[ ${release} == "centos" ]]; then
+      yum install -y socat
+    else
+      apt-get install -y socat
+    fi
+    read -p "请输入ZeroSSL的账户邮箱(至 zerossl.com 注册即可)：" zeromail
     read -p "请输入解析到本机的域名：" domain
     curl https://get.acme.sh | sh
+    "$HOME"/.acme.sh/acme.sh --set-default-ca --server zerossl
+    "$HOME"/.acme.sh/acme.sh --register-account -m "${zeromail}" --server zerossl
     echo -e "ACME证书申请程序安装成功"
-    if "$HOME"/.acme.sh/acme.sh --issue -d "${domain}" --standalone -k ec-256 --force; then
-      echo -e "SSL 证书生成成功，默认申请高安全性的ECC证书"
-      if [ ! -d "$HOME/gost_cert" ]; then
-        mkdir $HOME/gost_cert
-      fi
-      if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath $HOME/gost_cert/cert.pem --keypath $HOME/gost_cert/key.pem --ecc --force; then
-        echo -e "SSL 证书配置成功，且会自动续签，证书及秘钥位于用户目录下的 ${Red_font_prefix}gost_cert${Font_color_suffix} 目录"
-        echo -e "证书目录名与证书文件名请勿更改; 删除 gost_cert 目录后用脚本重启,即自动启用gost内置证书"
-        echo -e "-----------------------------------"
+    echo -e "-----------------------------------"
+    echo -e "[1] HTTP申请（需要80端口未占用）"
+    echo -e "[2] Cloudflare DNS API 申请（需要输入APIKEY）"
+    echo -e "-----------------------------------"
+    read -p "请选择证书申请方式: " certmethod
+    if [ "certmethod" == "1" ]; then
+      echo -e "请确认本机${Red_font_prefix}80${Font_color_suffix}端口未被占用, 否则会申请失败"
+      if "$HOME"/.acme.sh/acme.sh --issue -d "${domain}" --standalone -k ec-256 --force; then
+        echo -e "SSL 证书生成成功，默认申请高安全性的ECC证书"
+        if [ ! -d "$HOME/gost_cert" ]; then
+          mkdir $HOME/gost_cert
+        fi
+        if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath $HOME/gost_cert/cert.pem --keypath $HOME/gost_cert/key.pem --ecc --force; then
+          echo -e "SSL 证书配置成功，且会自动续签，证书及秘钥位于用户目录下的 ${Red_font_prefix}gost_cert${Font_color_suffix} 目录"
+          echo -e "证书目录名与证书文件名请勿更改; 删除 gost_cert 目录后用脚本重启,即自动启用gost内置证书"
+          echo -e "-----------------------------------"
+        fi
+      else
+        echo -e "SSL 证书生成失败"
+        exit 1
       fi
     else
-      echo -e "SSL 证书生成失败"
-      exit 1
+      read -p "请输入Cloudflare账户邮箱：" cfmail
+      read -p "请输入Cloudflare Global API Key：" cfkey
+      export CF_Key="${cfkey}"
+      export CF_Email="${cfmail}"
+      if "$HOME"/.acme.sh/acme.sh --issue --dns dns_cf -d "${domain}" --standalone -k ec-256 --force; then
+        echo -e "SSL 证书生成成功，默认申请高安全性的ECC证书"
+        if [ ! -d "$HOME/gost_cert" ]; then
+          mkdir $HOME/gost_cert
+        fi
+        if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath $HOME/gost_cert/cert.pem --keypath $HOME/gost_cert/key.pem --ecc --force; then
+          echo -e "SSL 证书配置成功，且会自动续签，证书及秘钥位于用户目录下的 ${Red_font_prefix}gost_cert${Font_color_suffix} 目录"
+          echo -e "证书目录名与证书文件名请勿更改; 删除 gost_cert 目录后使用脚本重启, 即重新启用gost内置证书"
+          echo -e "-----------------------------------"
+        fi
+      else
+        echo -e "SSL 证书生成失败"
+        exit 1
+      fi
     fi
+
   elif [ "$numcert" == "2" ]; then
     if [ ! -d "$HOME/gost_cert" ]; then
       mkdir $HOME/gost_cert
