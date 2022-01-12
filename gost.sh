@@ -211,7 +211,7 @@ function read_d_ip() {
     echo -e "------------------------------------------------------------------"
     echo -e "请问您要设置的ss加密(仅提供常用的几种): "
     echo -e "-----------------------------------"
-    echo -e "[1] aes-256-gcm"
+    echo -e "[1] aes-128-gcm"
     echo -e "[2] aes-256-cfb"
     echo -e "[3] chacha20-ietf-poly1305"
     echo -e "[4] chacha20"
@@ -221,7 +221,7 @@ function read_d_ip() {
     read -p "请选择ss加密方式: " ssencrypt
 
     if [ "$ssencrypt" == "1" ]; then
-      flag_c="aes-256-gcm"
+      flag_c="aes-128-gcm"
     elif [ "$ssencrypt" == "2" ]; then
       flag_c="aes-256-cfb"
     elif [ "$ssencrypt" == "3" ]; then
