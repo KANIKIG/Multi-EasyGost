@@ -63,7 +63,7 @@ function check_root() {
 function check_new_ver() {
   ct_new_ver=$(wget --no-check-certificate -qO- -t2 -T3 https://api.github.com/repos/ginuerzh/gost/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g')
   if [[ -z ${ct_new_ver} ]]; then
-    ct_new_ver="2.11.1"
+    ct_new_ver="2.11.2"
     echo -e "${Error} gost 最新版本获取失败，正在下载v${ct_new_ver}版"
   else
     echo -e "${Info} gost 目前最新版本为 ${ct_new_ver}"
