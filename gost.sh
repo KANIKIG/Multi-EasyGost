@@ -167,7 +167,7 @@ function read_protocol() {
   echo -e "说明: 对于经由gost加密中转的流量, 通过此选项进行解密并转发给本机的代理服务端口或转发给其他远程机器"
   echo -e "      一般设置在用于接收中转流量的国外机器上"
   echo -e "-----------------------------------"
-  echo -e "[4] 一键安装ss/socks5代理"
+  echo -e "[4] 一键安装ss/socks5/http代理"
   echo -e "说明: 使用gost内置的代理协议，轻量且易于管理"
   echo -e "-----------------------------------"
   echo -e "[5] 进阶：多落地均衡负载"
@@ -202,6 +202,9 @@ function read_s_port() {
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "请输入socks密码: " flag_b
+  elif [ "$flag_a" == "http" ]; then
+    echo -e "-----------------------------------"
+    read -p "请输入http密码: " flag_b
   else
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机哪个端口接收到的流量进行转发?"
@@ -241,6 +244,9 @@ function read_d_ip() {
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "请输入socks用户名: " flag_c
+  elif [ "$flag_a" == "http" ]; then
+    echo -e "-----------------------------------"
+    read -p "请输入http用户名: " flag_c
   elif [[ "$flag_a" == "peer"* ]]; then
     echo -e "------------------------------------------------------------------"
     echo -e "请输入落地列表文件名"
@@ -305,6 +311,10 @@ function read_d_port() {
   elif [ "$flag_a" == "socks" ]; then
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要设置socks代理服务的端口?"
+    read -p "请输入: " flag_d
+  elif [ "$flag_a" == "http" ]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "请问你要设置http代理服务的端口?"
     read -p "请输入: " flag_d
   elif [[ "$flag_a" == "peer"* ]]; then
     echo -e "------------------------------------------------------------------"
@@ -559,12 +569,15 @@ function proxy() {
   echo -e "-----------------------------------"
   echo -e "[1] shadowsocks"
   echo -e "[2] socks5(强烈建议加隧道用于Telegram代理)"
+  echo -e "[3] http"
   echo -e "-----------------------------------"
   read -p "请选择代理类型: " numproxy
   if [ "$numproxy" == "1" ]; then
     flag_a="ss"
   elif [ "$numproxy" == "2" ]; then
     flag_a="socks"
+  elif [ "$numproxy" == "3" ]; then
+    flag_a="http"
   else
     echo "type error, please try again"
     exit
@@ -647,6 +660,8 @@ function method() {
       echo "        \"ss://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "socks" ]; then
       echo "        \"socks5://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "http" ]; then
+      echo "        \"http://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
     else
       echo "config error"
     fi
@@ -726,6 +741,8 @@ function method() {
       echo "        \"ss://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
     elif [ "$is_encrypt" == "socks" ]; then
       echo "        \"socks5://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
+    elif [ "$is_encrypt" == "http" ]; then
+      echo "        \"http://$d_ip:$s_port@:$d_port\"" >>$gost_conf_path
     else
       echo "config error"
     fi
@@ -798,6 +815,8 @@ function show_all_conf() {
       str="   ss   "
     elif [ "$is_encrypt" == "socks" ]; then
       str=" socks5 "
+    elif [ "$is_encrypt" == "http" ]; then
+      str=" http "
     elif [ "$is_encrypt" == "cdnno" ]; then
       str="不加密转发CDN"
     elif [ "$is_encrypt" == "cdnws" ]; then
