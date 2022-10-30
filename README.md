@@ -35,7 +35,7 @@
 - 新支持传输类型
   - relay+ws
   - relay+wss
-- 落地机一键创建ss或socks5代理 (gost内置)
+- 落地机一键创建ss/socks5/http代理 (gost内置)
 - 支持多传输类型的多落地简单型均衡负载
 - 增加gost国内加速下载镜像
 - 简单创建或删除gost定时重启任务
